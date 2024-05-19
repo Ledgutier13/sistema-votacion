@@ -1,8 +1,4 @@
-const repoOwner = 'Ledgutier13';
-const repoName = 'sistema-votacion';
-const filePath = 'data.json';
-const branch = 'main';
-const token = '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'; // Reemplaza con tu token personal de GitHub
+
 
 let votos = { si: 0, no: 0, abstenerse: 0 };
 let opcionSeleccionada = null;
