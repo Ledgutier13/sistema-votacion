@@ -127,6 +127,21 @@ function verificarCredencialesVotar() {
     }
 }
 
+async function cambiarContrasena() {
+    const usuario = document.getElementById('usuarioCambiar').value;
+    const contrasenaActual = document.getElementById('contrasenaActual').value;
+    const nuevaContrasena = document.getElementById('nuevaContrasena').value;
+
+    if (usuarios[usuario] && usuarios[usuario].contrasena === contrasenaActual) {
+        usuarios[usuario].contrasena = nuevaContrasena;
+        await guardarDatos();
+        alert('Contraseña cambiada exitosamente.');
+        mostrarPagina('loginVotar');
+    } else {
+        document.getElementById('mensajeErrorCambiar').style.display = 'block';
+    }
+}
+
 function mostrarResultados() {
     const totalVotos = votos.si + votos.no + votos.abstenerse;
     const porcentajes = {
@@ -177,3 +192,4 @@ function mostrarResultados() {
 window.onload = function() {
     cargarDatos();
 };
+
