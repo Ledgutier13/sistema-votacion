@@ -1,14 +1,65 @@
+const repoOwner = 'Ledgutier13';
+const repoName = 'sistema-votacion';
+const filePath = 'data.json';
+const branch = 'main';
+const token = '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'; // Reemplaza con tu token personal de GitHub
+
 let votos = { si: 0, no: 0, abstenerse: 0 };
 let opcionSeleccionada = null;
 let grafica;
-const usuarios = {
-    cher2024: { contrasena: '2024', haVotado: false },
-    sua2024: { contrasena: '2024', haVotado: false },
-    sel2024: { contrasena: '2024', haVotado: false },
-    mar2024: { contrasena: '2024', haVotado: false },
-    led2024: { contrasena: '2024', haVotado: false }
-};
+let usuarios = {};
 let usuarioActual = null;
+
+async function fetchData() {
+    const response = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/${filePath}`);
+    const data = await response.json();
+    votos = data.votos;
+    usuarios = data.usuarios;
+    document.getElementById('titulo').innerText = data.titulo;
+    document.getElementById('descripcion').innerText = data.descripcion;
+}
+
+async function saveData() {
+    const data = {
+        titulo: document.getElementById('titulo').innerText,
+        descripcion: document.getElementById('descripcion').innerText,
+        votos: votos,
+        usuarios: usuarios
+    };
+
+    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            message: 'Actualizar datos de votación',
+            content: btoa(JSON.stringify(data)),
+            sha: await getFileSha()
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al guardar los datos');
+    }
+}
+
+async function getFileSha() {
+    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`);
+    const data = await response.json();
+    return data.sha;
+}
+
+async function borrarVotacion() {
+    votos = { si: 0, no: 0, abstenerse: 0 };
+    for (let usuario in usuarios) {
+        usuarios[usuario].haVotado = false;
+    }
+    await saveData();
+    alert('La votación ha sido borrada.');
+    mostrarPagina('inicio');
+}
 
 function mostrarPagina(pagina) {
     document.querySelectorAll('.pagina').forEach(p => p.style.display = 'none');
@@ -21,10 +72,11 @@ function seleccionarOpcion(opcion) {
     document.getElementById(`btn-${opcion}`).classList.add('seleccionado');
 }
 
-function enviarVoto() {
+async function enviarVoto() {
     if (opcionSeleccionada) {
         votos[opcionSeleccionada]++;
         usuarios[usuarioActual].haVotado = true;
+        await saveData();
         document.getElementById('confirmacion').style.display = 'block';
         setTimeout(() => {
             mostrarPagina('inicio');
@@ -40,19 +92,7 @@ function guardarTexto() {
     const nuevaDescripcion = document.getElementById('nuevaDescripcion').value;
     document.getElementById('titulo').innerText = nuevoTitulo;
     document.getElementById('descripcion').innerText = nuevaDescripcion;
-    localStorage.setItem('titulo', nuevoTitulo);
-    localStorage.setItem('descripcion', nuevaDescripcion);
-    mostrarPagina('inicio');
-}
-
-function borrarVotacion() {
-    votos = { si: 0, no: 0, abstenerse: 0 };
-    for (let usuario in usuarios) {
-        usuarios[usuario].haVotado = false;
-    }
-    localStorage.removeItem('votos');
-    localStorage.removeItem('usuarios');
-    alert('La votación ha sido borrada.');
+    saveData();
     mostrarPagina('inicio');
 }
 
@@ -134,26 +174,7 @@ function mostrarResultados() {
     });
 }
 
+// Cargar datos al iniciar
 window.onload = function() {
-    const titulo = localStorage.getItem('titulo');
-    const descripcion = localStorage.getItem('descripcion');
-    if (titulo) {
-        document.getElementById('titulo').innerText = titulo;
-    }
-    if (descripcion) {
-        document.getElementById('descripcion').innerText = descripcion;
-    }
-    const votosGuardados = localStorage.getItem('votos');
-    if (votosGuardados) {
-        votos = JSON.parse(votosGuardados);
-    }
-    const usuariosGuardados = localStorage.getItem('usuarios');
-    if (usuariosGuardados) {
-        Object.assign(usuarios, JSON.parse(usuariosGuardados));
-    }
-};
-
-window.onbeforeunload = function() {
-    localStorage.setItem('votos', JSON.stringify(votos));
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    fetchData();
 };
