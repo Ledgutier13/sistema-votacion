@@ -119,9 +119,13 @@ function verificarCredencialesEditar() {
 function verificarCredencialesVotar() {
     const usuario = document.getElementById('usuarioVotar').value;
     const contrasena = document.getElementById('contrasenaVotar').value;
-    if (usuarios[usuario] && usuarios[usuario].contrasena === contrasena && !usuarios[usuario].haVotado) {
-        usuarioActual = usuario;
-        mostrarPagina('votacion');
+    if (usuarios[usuario] && usuarios[usuario].contrasena === contrasena) {
+        if (usuarios[usuario].haVotado) {
+            mostrarDialogo('yaVotoDialog');
+        } else {
+            usuarioActual = usuario;
+            mostrarPagina('votacion');
+        }
     } else {
         document.getElementById('mensajeErrorVotar').style.display = 'block';
     }
@@ -188,8 +192,15 @@ function mostrarResultados() {
     });
 }
 
+function mostrarDialogo(dialogoId) {
+    document.getElementById(dialogoId).style.display = 'block';
+}
+
+function cerrarDialogo(dialogoId) {
+    document.getElementById(dialogoId).style.display = 'none';
+}
+
 // Cargar datos al iniciar
 window.onload = function() {
     cargarDatos();
 };
-
