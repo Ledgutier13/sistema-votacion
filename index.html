@@ -6,6 +6,10 @@
     <title>Votación Interactiva</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
     <!-- Página de Inicio -->
@@ -29,6 +33,7 @@
         <button onclick="verificarCredencialesVotar()">Acceder</button>
         <p id="mensajeErrorVotar" style="color:red; display:none;">Usuario o contraseña incorrectos o ya ha votado.</p>
         <button onclick="mostrarPagina('inicio')">← Volver</button>
+        <p>¿Olvidaste tu contraseña? <a href="#" onclick="mostrarPagina('cambiarContrasena')">Cambia tu contraseña aquí</a>.</p>
     </div>
 
     <!-- Página de Login para Edición -->
@@ -76,6 +81,20 @@
         <button onclick="verificarCredenciales()">Ver Resultados</button>
         <p id="mensajeError" style="color:red; display:none;">Usuario o contraseña incorrectos.</p>
         <button onclick="mostrarPagina('inicio')">← Volver</button>
+    </div>
+
+    <!-- Página para Cambiar Contraseña -->
+    <div id="cambiarContrasena" class="pagina" style="display:none;">
+        <h2>Cambiar Contraseña</h2>
+        <label for="usuarioCambiar">Usuario:</label>
+        <input type="text" id="usuarioCambiar"><br>
+        <label for="contrasenaActual">Contraseña Actual:</label>
+        <input type="password" id="contrasenaActual"><br>
+        <label for="nuevaContrasena">Nueva Contraseña:</label>
+        <input type="password" id="nuevaContrasena"><br>
+        <button onclick="cambiarContrasena()">Cambiar Contraseña</button>
+        <p id="mensajeErrorCambiar" style="color:red; display:none;">Usuario o contraseña incorrectos.</p>
+        <button onclick="mostrarPagina('loginVotar')">← Volver</button>
     </div>
 
     <!-- Página de Resultados -->
