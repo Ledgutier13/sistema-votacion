@@ -1,50 +1,52 @@
+// Configuración de JSONBin.io
+const JSONBIN_API_KEY = '$2a$10$tQV8VfSG1lxUp/gqZdEfiOlolgvbEAfdHYUQBWAqLfVL2XkbR7vzW'; // X-MASTER-KEY
+const JSONBIN_ID = '6644fd97e41b4d34e4f43c21'; // ID del Bin
 
-
+// Variables globales
 let votos = { si: 0, no: 0, abstenerse: 0 };
 let opcionSeleccionada = null;
 let grafica;
-let usuarios = {};
+const usuarios = {
+    cher2024: { contrasena: '2024', haVotado: false },
+    sua2024: { contrasena: '2024', haVotado: false },
+    sel2024: { contrasena: '2024', haVotado: false },
+    mar2024: { contrasena: '2024', haVotado: false },
+    led2024: { contrasena: '2024', haVotado: false }
+};
 let usuarioActual = null;
 
-async function fetchData() {
-    const response = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/${filePath}`);
-    const data = await response.json();
-    votos = data.votos;
-    usuarios = data.usuarios;
-    document.getElementById('titulo').innerText = data.titulo;
-    document.getElementById('descripcion').innerText = data.descripcion;
-}
-
-async function saveData() {
-    const data = {
-        titulo: document.getElementById('titulo').innerText,
-        descripcion: document.getElementById('descripcion').innerText,
-        votos: votos,
-        usuarios: usuarios
-    };
-
-    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-        method: 'PUT',
+// Funciones para interactuar con JSONBin.io
+async function cargarDatos() {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
         headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            message: 'Actualizar datos de votación',
-            content: btoa(JSON.stringify(data)),
-            sha: await getFileSha()
-        })
+            'X-Master-Key': JSONBIN_API_KEY
+        }
     });
-
-    if (!response.ok) {
-        throw new Error('Error al guardar los datos');
+    const data = await response.json();
+    if (data && data.record) {
+        votos = data.record.votos;
+        Object.assign(usuarios, data.record.usuarios);
+        document.getElementById('titulo').innerText = data.record.titulo;
+        document.getElementById('descripcion').innerText = data.record.descripcion;
     }
 }
 
-async function getFileSha() {
-    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`);
+async function guardarDatos() {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY
+        },
+        body: JSON.stringify({
+            votos: votos,
+            usuarios: usuarios,
+            titulo: document.getElementById('titulo').innerText,
+            descripcion: document.getElementById('descripcion').innerText
+        })
+    });
     const data = await response.json();
-    return data.sha;
+    return data;
 }
 
 async function borrarVotacion() {
@@ -52,11 +54,12 @@ async function borrarVotacion() {
     for (let usuario in usuarios) {
         usuarios[usuario].haVotado = false;
     }
-    await saveData();
+    await guardarDatos();
     alert('La votación ha sido borrada.');
     mostrarPagina('inicio');
 }
 
+// Funciones de la aplicación
 function mostrarPagina(pagina) {
     document.querySelectorAll('.pagina').forEach(p => p.style.display = 'none');
     document.getElementById(pagina).style.display = 'block';
@@ -72,7 +75,7 @@ async function enviarVoto() {
     if (opcionSeleccionada) {
         votos[opcionSeleccionada]++;
         usuarios[usuarioActual].haVotado = true;
-        await saveData();
+        await guardarDatos();
         document.getElementById('confirmacion').style.display = 'block';
         setTimeout(() => {
             mostrarPagina('inicio');
@@ -88,7 +91,7 @@ function guardarTexto() {
     const nuevaDescripcion = document.getElementById('nuevaDescripcion').value;
     document.getElementById('titulo').innerText = nuevoTitulo;
     document.getElementById('descripcion').innerText = nuevaDescripcion;
-    saveData();
+    guardarDatos();
     mostrarPagina('inicio');
 }
 
@@ -172,5 +175,5 @@ function mostrarResultados() {
 
 // Cargar datos al iniciar
 window.onload = function() {
-    fetchData();
+    cargarDatos();
 };
