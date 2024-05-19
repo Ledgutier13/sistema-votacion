@@ -31,7 +31,7 @@
         <label for="contrasenaVotar">Contraseña:</label>
         <input type="password" id="contrasenaVotar"><br>
         <button onclick="verificarCredencialesVotar()">Acceder</button>
-        <p id="mensajeErrorVotar" style="color:red; display:none;">Usuario o contraseña incorrectos o ya ha votado.</p>
+        <p id="mensajeErrorVotar" style="color:red; display:none;">Usuario o contraseña incorrectos.</p>
         <button onclick="mostrarPagina('inicio')">← Volver</button>
         <p>¿Olvidaste tu contraseña? <a href="#" onclick="mostrarPagina('cambiarContrasena')">Cambia tu contraseña aquí</a>.</p>
     </div>
@@ -108,6 +108,15 @@
         <button onclick="mostrarPagina('inicio')">← Volver</button>
     </div>
 
+    <!-- Cuadro de diálogo para "Usted ya votó" -->
+    <div id="yaVotoDialog" class="dialogo" style="display:none;">
+        <div class="dialogo-contenido">
+            <span class="cerrar" onclick="cerrarDialogo('yaVotoDialog')">&times;</span>
+            <p>Usted ya votó.</p>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
+
